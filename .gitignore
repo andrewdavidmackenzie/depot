@@ -19,5 +19,3 @@ log/
 .idea/
 *.iml
 *.eml
-
-bin/
