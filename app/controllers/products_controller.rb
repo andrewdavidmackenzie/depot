@@ -1,10 +1,30 @@
+require 'rubygems'
+require '3scale_client'
+
+# TODO get from env or foreman
+THREESCALE_PROVIDER_KEY = '4d72c340eee46cd411551856131608c6'
+
 class ProductsController < ApplicationController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
+
+  def do_authrep
+    # keep your provider key secret
+    client = ThreeScale::Client.new(:provider_key => THREESCALE_PROVIDER_KEY)
+
+# you will usually obtain app_id and app_key from request params
+    client.authrep(:user_key => '596189725924ca31199b71d1fd8534c5',
+                              :usage => {:hits => 1})
+  end
 
   # GET /products
   # GET /products.json
   def index
-    @products = Product.all
+    response = do_authrep
+    if response.success?
+      @products = Product.all
+    else
+      puts "Error: #{response.error_message}"
+    end
   end
 
   # GET /products/1
@@ -62,13 +82,13 @@ class ProductsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_product
-      @product = Product.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_product
+    @product = Product.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def product_params
-      params.require(:product).permit(:title, :description, :image_url, :price)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def product_params
+    params.require(:product).permit(:title, :description, :image_url, :price)
+  end
 end

@@ -19,3 +19,4 @@ log/
 .idea/
 *.iml
 *.eml
+.env
