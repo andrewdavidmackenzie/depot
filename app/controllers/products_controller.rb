@@ -7,23 +7,25 @@ THREESCALE_PROVIDER_KEY = '4d72c340eee46cd411551856131608c6'
 class ProductsController < ApplicationController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
 
-  def do_authrep
+  def do_authrep(user_key)
     # keep your provider key secret
     client = ThreeScale::Client.new(:provider_key => THREESCALE_PROVIDER_KEY)
 
 # you will usually obtain app_id and app_key from request params
-    client.authrep(:user_key => '596189725924ca31199b71d1fd8534c5',
+    client.authrep(:user_key => user_key,
                               :usage => {:hits => 1})
   end
 
   # GET /products
   # GET /products.json
   def index
-    response = do_authrep
+    # params[:user_key]  ??
+    response = do_authrep('596189725924ca31199b71d1fd8534c5') # TODO FIXME and get from parameter
     if response.success?
       @products = Product.all
     else
-      puts "Error: #{response.error_message}"
+      puts "Error: #{response.error_message}" + ", Response code from 3Scale: #{response.code}"
+      render :status => 429
     end
   end
 

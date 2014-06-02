@@ -2,8 +2,10 @@
 require 'net/http'
 require 'json'
 
-# DEFAULT_HOST = 'api.2445581056832.proxy.3scale.net:80'
-DEFAULT_HOST = 'api.2445581056832.proxy.3scale.net:80'
+API_HOST = 'immense-garden-1508.herokuapp.com'
+PROXY_HOST = 'api.2445581056832.proxy.3scale.net:80'
+LOCAL_HOST = '0.0.0.0:3000'
+HOSTS = [LOCAL_HOST, PROXY_HOST, API_HOST]
 PRODUCTS_PATH = '/products.json'
 USER_KEY = '596189725924ca31199b71d1fd8534c5'
 
@@ -22,7 +24,7 @@ def api_request(uri)
   if response.code == '200'
     puts 'Response OK'
   else
-    raise SystemCallError('Error Code: ' + response.code)
+    raise IOError('Error Code: ' + response.code)
   end
   return response
 end
@@ -33,11 +35,20 @@ def get_product_list(root_url)
 end
 
 def get_hostname
-  hostname = DEFAULT_HOST
-  puts "Enter hostname (default='#{DEFAULT_HOST}')"
+  puts 'Known Hosts\n'
+  hostname = API_HOST
+  index = 0
+  HOSTS.each { |h|
+    puts "#{index}) #{HOSTS[index]}"
+    index += 1
+  }
+
+  puts "Enter hostname (default='#{hostname}')"
   STDOUT.flush
   input = gets.chomp
-  hostname = input unless input.empty?
+  if (!input.empty? && input.to_i < HOSTS.size)
+    hostname = HOSTS[input.to_i]
+  end
   return hostname
 end
 
@@ -57,7 +68,7 @@ begin
   puts 'Hit enter to repeat, or enter Q to Quit'
   input = gets
 
-rescue SystemCallError
+rescue IOError
   $stderr.print 'IO failed: ' + $!.to_s
 
 end while input && !input.include?('q')
